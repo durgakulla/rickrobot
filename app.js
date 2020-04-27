@@ -9,7 +9,7 @@ app.use('/client',express.static(__dirname + '/client'));
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 8000;
+  port = 2000;
 }
 serv.listen(port);
 console.log("Server started.");
@@ -196,6 +196,9 @@ Player.onConnect = function(socket){
 }
 Player.onDisconnect = function(socket){
     delete Player.list[socket.id];
+    delete Player.list[socket.id+1];
+    delete Player.list[socket.id+2];
+    delete Player.list[socket.id+3];
 }
 Player.update = function(){
     var pack = [];
@@ -223,7 +226,25 @@ io.sockets.on('connection', function(socket){
     Player.onConnect(socket);
 
     socket.on('disconnect',function(){
+        var lastpack = {
+            player:Player.update()
+        }
+        posToReset = [];
+        for(i in lastpack.player){
+            if(lastpack.player[i].id == socket.id)
+                level[lastpack.player[i].rowpos][lastpack.player[i].colpos] = 0;
+            else if(lastpack.player[i].id == socket.id + 1)
+                level[lastpack.player[i].rowpos][lastpack.player[i].colpos] = 0;
+            else if(lastpack.player[i].id == socket.id + 2)
+                level[lastpack.player[i].rowpos][lastpack.player[i].colpos] = 0;
+            else if(lastpack.player[i].id == socket.id + 3)
+                level[lastpack.player[i].rowpos][lastpack.player[i].colpos] = 0;
+        }
         delete SOCKET_LIST[socket.id];
+        delete Player.list[socket.id];
+        delete Player.list[socket.id+1];
+        delete Player.list[socket.id+2];
+        delete Player.list[socket.id+3];
         Player.onDisconnect(socket);
     });
     socket.on('sendMsgToServer',function(data){

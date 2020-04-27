@@ -16,7 +16,7 @@
     var ctx = document.getElementById("ctx").getContext("2d");
     ctx.font = '30px Arial';
 
-    var socket = io();
+    var socket = io({transports: ['websocket'], upgrade: false});
 
     socket.on('newPositions',function(data){
         const squareSize = 25;
