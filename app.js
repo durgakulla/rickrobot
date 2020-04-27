@@ -7,7 +7,11 @@ app.get('/',function(req, res) {
 });
 app.use('/client',express.static(__dirname + '/client'));
 
-serv.listen(2000);
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 8000;
+}
+serv.listen(port);
 console.log("Server started.");
 
 var SOCKET_LIST = {};
