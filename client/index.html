@@ -1,115 +1,157 @@
-<canvas id="ctx" width="500" height="510"></canvas>
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="login-wrap" style="width:800;margin: 0 auto;position:relative;top:100px;">
+            <form id="login-form" style="display:inline;">
+            Your Name:<br>
+                <input id="name-input" type="text" style="font-size: 14;width:300px;height:50px;border: 2px solid red;border-radius: 4px;" placeholder="Enter your name"></input><br><br>
+            Room ID:<br>
+                <input id="roomid-input" type="text" style="font-size: 14;width:300px;height:50px;border: 2px solid red;border-radius: 4px;" placeholder="Enter Room ID"></input><br><br>
+                <input type="submit" value="Join">
+            </form></br></br></br>
 
-<div id="chat-text" style="width:500px;height:100px;overflow-y:scroll">
-    <div>Hello!</div>
-</div>
+            <form id="roomid-form" style="display:inline;">
 
-<form id="chat-form">
-    <input id="chat-input" type="text" style="width:500px"></input>
-</form>
+            </form>
+        </div>
+        <div id="game-wrap" style="font-size: 20;display:none;width:800px;height:600px;margin: 0 auto;">
+            <div id="canvas-wrap" style="width: 500px;height: 500px;position: relative;top: 0;right: 0;">
+                <canvas id="ctx" width="500" height="500" style="display:inline;"></canvas>
+            </div>
+            <div id="chat-wrap" style="width:300px;height:500px;position:relative; left:500px; bottom:500px;">
+                <div id="chat-text" style="width:100%;height:100%;overflow-y:scroll;display: flex;flex-direction: column-reverse;">
+                    <div>Hello!</div>
+                </div>
+                <form id="chat-form" style="display:inline;">
+                    <input id="chat-input" type="text" style="font-size: 14;width:300px;height:50px;border: 2px solid red;border-radius: 4px;" placeholder="Type a message..."></input>
+                </form>
+            </div>
+        </div>
 
-<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
-<script>
-    var chatText = document.getElementById('chat-text');
-    var chatInput = document.getElementById('chat-input');
-    var chatForm = document.getElementById('chat-form');
-    var ctx = document.getElementById("ctx").getContext("2d");
-    ctx.font = '30px Arial';
 
-    var socket = io({transports: ['websocket'], upgrade: false});
+        <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+        <script>
+            var loginWrap = document.getElementById("login-wrap");
+            var gameWrap = document.getElementById("game-wrap");
+            var loginForm = document.getElementById('login-form');
+            var nameInput = document.getElementById('name-input');
+            var roomidInput = document.getElementById('roomid-input');
+            var chatText = document.getElementById('chat-text');
+            var chatInput = document.getElementById('chat-input');
+            var chatForm = document.getElementById('chat-form');
+            var ctx = document.getElementById("ctx").getContext("2d");
+            ctx.font = '30px Arial';
 
-    socket.on('newPositions',function(data){
-        const squareSize = 25;
-        // position of board's top left
-        const boardTopx = 0;
-        const boardTopy = 0;
-        for(let i=0; i<data.level.length; i++) {
-          for(let j=0; j<data.level[0].length; j++) {
-            if(data.level[i][j] === 0)
-              ctx.fillStyle = "white";
-            else if(data.level[i][j] === 1)
-              ctx.fillStyle = "black";
-            else
-              ctx.fillStyle = "white";
-            let xOffset = boardTopx + j*squareSize;
-            let yOffset = boardTopy + i*squareSize;
-            ctx.fillRect(xOffset, yOffset, squareSize, squareSize);
-            ctx.strokeStyle = "black";
-            ctx.strokeRect(xOffset, yOffset, squareSize, squareSize);
-          }
-        }
-        // draw the border around the chessboard
-        ctx.strokeStyle = "black";
-        ctx.strokeRect(boardTopx, boardTopy, squareSize*data.level.length, squareSize*data.level.length)
+            var socket = io({transports: ['websocket'], upgrade: false});
 
-        for(var i = 0 ; i < data.player.length; i++){
-            let xOffset = boardTopx + data.player[i].colpos*squareSize;
-            let yOffset = boardTopy + data.player[i].rowpos*squareSize;
-            if(data.player[i].id < 1)
-                ctx.fillStyle = "red";
-            else if(data.player[i].id < 2)
-                ctx.fillStyle = "blue";
-            else if(data.player[i].id < 3)
-                ctx.fillStyle = "green";
-            else if(data.player[i].id < 4)
-                ctx.fillStyle = "yellow";
-            ctx.fillRect(xOffset+5/2, yOffset+5/2, squareSize-5, squareSize-5);
-        }
+            socket.on('newPlayerJoined',function(data){
+                loginWrap.style.display = "none";
+                gameWrap.style.display = "block";
+            });
 
-    });
+            socket.on('newPositions',function(data){
+                const squareSize = 25;
+                // position of board's top left
+                const boardTopx = 0;
+                const boardTopy = 0;
+                for(let i=0; i<data.level.length; i++) {
+                  for(let j=0; j<data.level[0].length; j++) {
+                    if(data.level[i][j] === 0)
+                      ctx.fillStyle = "white";
+                    else if(data.level[i][j] === 1)
+                      ctx.fillStyle = "black";
+                    else
+                      ctx.fillStyle = "white";
+                    let xOffset = boardTopx + j*squareSize;
+                    let yOffset = boardTopy + i*squareSize;
+                    ctx.fillRect(xOffset, yOffset, squareSize, squareSize);
+                    ctx.strokeStyle = "black";
+                    ctx.strokeRect(xOffset, yOffset, squareSize, squareSize);
+                  }
+                }
+                // draw the border around the chessboard
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(boardTopx, boardTopy, squareSize*data.level.length, squareSize*data.level.length)
 
-    socket.on('addToChat',function(data){
-        chatText.innerHTML += '<div>' + data + '</div>';
-    });
-    socket.on('evalAnswer',function(data){
-        console.log(data);
-    });
+                for(var i = 0 ; i < data.player.length; i++){
+                    let xOffset = boardTopx + data.player[i].colpos*squareSize;
+                    let yOffset = boardTopy + data.player[i].rowpos*squareSize;
+                    if(data.player[i].id < 1)
+                        ctx.fillStyle = "red";
+                    else if(data.player[i].id < 2)
+                        ctx.fillStyle = "blue";
+                    else if(data.player[i].id < 3)
+                        ctx.fillStyle = "green";
+                    else if(data.player[i].id < 4)
+                        ctx.fillStyle = "yellow";
+                    ctx.fillRect(xOffset+5/2, yOffset+5/2, squareSize-5, squareSize-5);
+                }
 
-    chatForm.onsubmit = function(e){
-        e.preventDefault();
-        if(chatInput.value[0] === '/')
-            socket.emit('evalServer',chatInput.value.slice(1));
-        else
-            socket.emit('sendMsgToServer',chatInput.value);
-        chatInput.value = '';
-    }
+            });
 
-    document.onkeydown = function(event){
-        if(event.keyCode === 39)    //arrow right
-            socket.emit('keyPress',{inputId:'right',state:true});
-        else if(event.keyCode === 40)   //arrow down
-            socket.emit('keyPress',{inputId:'down',state:true});
-        else if(event.keyCode === 37) //arrow left
-            socket.emit('keyPress',{inputId:'left',state:true});
-        else if(event.keyCode === 38) // arrow up
-            socket.emit('keyPress',{inputId:'up',state:true});
-        else if(event.keyCode === 49) // 1
-            socket.emit('keyPress',{inputId:'one',state:true});
-        else if(event.keyCode === 50) // 2
-            socket.emit('keyPress',{inputId:'two',state:true});
-        else if(event.keyCode === 51) // 3
-            socket.emit('keyPress',{inputId:'three',state:true});
-        else if(event.keyCode === 52) // 4
-            socket.emit('keyPress',{inputId:'four',state:true});
+            socket.on('addToChat',function(data){
+                chatText.innerHTML = '<div>' + data + '</div>' + chatText.innerHTML;
+            });
 
-    }
-    document.onkeyup = function(event){
-        if(event.keyCode === 39)    //arrow right
-            socket.emit('keyPress',{inputId:'right',state:false});
-        else if(event.keyCode === 40)   //arrow down
-            socket.emit('keyPress',{inputId:'down',state:false});
-        else if(event.keyCode === 37) //arrow left
-            socket.emit('keyPress',{inputId:'left',state:false});
-        else if(event.keyCode === 38) // arrow up
-            socket.emit('keyPress',{inputId:'up',state:false});
-        else if(event.keyCode === 49) // 1
-            socket.emit('keyPress',{inputId:'one',state:false});
-        else if(event.keyCode === 50) // 2
-            socket.emit('keyPress',{inputId:'two',state:false});
-        else if(event.keyCode === 51) // 3
-            socket.emit('keyPress',{inputId:'three',state:false});
-        else if(event.keyCode === 52) // 4
-            socket.emit('keyPress',{inputId:'four',state:false});
-    }
+            loginForm.onsubmit = function(e){
+                e.preventDefault();
+                if(chatInput.value[0] === '/')
+                    socket.emit('evalServer',roomidInput.value.slice(1));
+                else
+                    socket.emit('sendDisplaynameToServer',[nameInput.value, roomidInput.value]);
+            }
+            chatForm.onsubmit = function(e){
+                e.preventDefault();
+                if(chatInput.value[0] === '/')
+                    socket.emit('evalServer',chatInput.value.slice(1));
+                else
+                    socket.emit('sendMsgToServer',chatInput.value);
+                chatInput.value = '';
+            }
 
-</script>
+            document.onkeydown = function(event){
+                if(document.activeElement.tagName != 'INPUT'){
+                    if(event.keyCode === 39)    //arrow right
+                        socket.emit('keyPress',{inputId:'right',state:true});
+                    else if(event.keyCode === 40)   //arrow down
+                        socket.emit('keyPress',{inputId:'down',state:true});
+                    else if(event.keyCode === 37) //arrow left
+                        socket.emit('keyPress',{inputId:'left',state:true});
+                    else if(event.keyCode === 38) // arrow up
+                        socket.emit('keyPress',{inputId:'up',state:true});
+                    else if(event.keyCode === 49) // 1
+                        socket.emit('keyPress',{inputId:'one',state:true});
+                    else if(event.keyCode === 50) // 2
+                        socket.emit('keyPress',{inputId:'two',state:true});
+                    else if(event.keyCode === 51) // 3
+                        socket.emit('keyPress',{inputId:'three',state:true});
+                    else if(event.keyCode === 52) // 4
+                        socket.emit('keyPress',{inputId:'four',state:true});
+                }
+
+            }
+            document.onkeyup = function(event){
+                if(document.activeElement.tagName != 'INPUT'){
+                    if(event.keyCode === 39)    //arrow right
+                        socket.emit('keyPress',{inputId:'right',state:false});
+                    else if(event.keyCode === 40)   //arrow down
+                        socket.emit('keyPress',{inputId:'down',state:false});
+                    else if(event.keyCode === 37) //arrow left
+                        socket.emit('keyPress',{inputId:'left',state:false});
+                    else if(event.keyCode === 38) // arrow up
+                        socket.emit('keyPress',{inputId:'up',state:false});
+                    else if(event.keyCode === 49) // 1
+                        socket.emit('keyPress',{inputId:'one',state:false});
+                    else if(event.keyCode === 50) // 2
+                        socket.emit('keyPress',{inputId:'two',state:false});
+                    else if(event.keyCode === 51) // 3
+                        socket.emit('keyPress',{inputId:'three',state:false});
+                    else if(event.keyCode === 52) // 4
+                        socket.emit('keyPress',{inputId:'four',state:false});
+                }
+            }
+
+        </script>
+    </body>
+</html>

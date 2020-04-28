@@ -224,8 +224,7 @@ Player.update = function(){
     return pack;
 }
 
-
-var DEBUG = true;
+var displaynames = {};
 
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', function(socket){
@@ -251,26 +250,30 @@ io.sockets.on('connection', function(socket){
         }
         delete SOCKET_LIST[socket.id];
         delete Player.list[socket.id];
+        delete displaynames[socket.id];
         delete Player.list[socket.id+1];
         delete Player.list[socket.id+2];
         delete Player.list[socket.id+3];
         Player.onDisconnect(socket);
     });
+    socket.on('sendDisplaynameToServer',function(data){
+        displaynames[socket.id] = data[0];
+        var pack = {
+            displayname: data[0],
+            roomid: data[1],
+            socketid: socket.id,
+        }
+        socket.emit('newPlayerJoined',pack);
+        for(var i in SOCKET_LIST){
+            SOCKET_LIST[i].emit('addToChat',pack.displayname + ' is joining the chat...');
+        }
+    });
     socket.on('sendMsgToServer',function(data){
-        var playerName = ("" + socket.id).slice(2,7);
+        var playerName = (displaynames[socket.id]);
         for(var i in SOCKET_LIST){
             SOCKET_LIST[i].emit('addToChat',playerName + ': ' + data);
         }
     });
-
-    socket.on('evalServer',function(data){
-        if(!DEBUG)
-            return;
-        var res = eval(data);
-        socket.emit('evalAnswer',res);
-    });
-
-
 
 });
 
