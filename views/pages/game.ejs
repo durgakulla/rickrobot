@@ -1,23 +1,27 @@
 <html>
     <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        <link rel="manifest" href="/site.webmanifest">
     </head>
     <body>
+        <!-- Ask for username to display in the chat -->
         <div id="login-wrap" style="width:800;margin: 0 auto;position:relative;top:100px;">
             <form id="login-form" style="display:inline;">
-            Your Name:<br>
+            Enter a display name:<br>
                 <input id="name-input" type="text" style="font-size: 14;width:300px;height:50px;border: 2px solid red;border-radius: 4px;" placeholder="Enter your name"></input><br><br>
-            Room ID:<br>
-                <input id="roomid-input" type="text" style="font-size: 14;width:300px;height:50px;border: 2px solid red;border-radius: 4px;" placeholder="Enter Room ID"></input><br><br>
                 <input type="submit" value="Join">
             </form></br></br></br>
         </div>
+        <!-- display the canvas and chatbox -->
         <div id="game-wrap" style="font-size: 20;display:none;width:800px;height:600px;margin: 0 auto;">
             <div id="canvas-wrap" style="width: 500px;height: 500px;position: relative;top: 0;right: 0;">
                 <canvas id="ctx" width="500" height="500" style="display:inline;"></canvas>
             </div>
             <div id="chat-wrap" style="width:300px;height:500px;position:relative; left:500px; bottom:500px;">
                 <div id="chat-text" style="width:100%;height:100%;overflow-y:scroll;display: flex;flex-direction: column-reverse;">
-                    <div>Hello!</div>
+                    <div>Hi! Welcome to the game!</div>
                 </div>
                 <form id="chat-form" style="display:inline;">
                     <input id="chat-input" type="text" style="font-size: 14;width:300px;height:50px;border: 2px solid red;border-radius: 4px;" placeholder="Type a message..."></input>
@@ -25,23 +29,34 @@
             </div>
         </div>
 
-
+        <!-- the following scripts control client game rendering -->
         <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
         <script>
+            //read in form inputs and html/canvas elements
             var loginWrap = document.getElementById("login-wrap");
             var gameWrap = document.getElementById("game-wrap");
             var loginForm = document.getElementById('login-form');
             var nameInput = document.getElementById('name-input');
-            var roomidInput = document.getElementById('roomid-input');
             var chatText = document.getElementById('chat-text');
             var chatInput = document.getElementById('chat-input');
             var chatForm = document.getElementById('chat-form');
             var ctx = document.getElementById("ctx").getContext("2d");
-            ctx.font = '30px Arial';
+            //TODO: this is NOT the best way to get roomid. Improve!
+            var roomid = window.location.pathname.split('id-').pop();
 
+            //start socket
             var socket = io({transports: ['websocket'], upgrade: false});
 
-            socket.on('newPlayerJoined',function(data){
+            //when a user provides their displayname, send to server
+            //also send the server the roomid of the room user is joining
+            loginForm.onsubmit = function(e){
+                e.preventDefault();
+                socket.emit('sendRoomidToServer',roomid);
+                socket.emit('sendDisplaynameToServer',[nameInput.value]);
+            }
+
+            //Server tells client to showboard after user submits their display name
+            socket.on('showBoard',function(){
                 loginWrap.style.display = "none";
                 gameWrap.style.display = "block";
             });
@@ -90,13 +105,6 @@
                 chatText.innerHTML = '<div>' + data + '</div>' + chatText.innerHTML;
             });
 
-            loginForm.onsubmit = function(e){
-                e.preventDefault();
-                if(chatInput.value[0] === '/')
-                    socket.emit('evalServer',roomidInput.value.slice(1));
-                else
-                    socket.emit('sendDisplaynameToServer',[nameInput.value, roomidInput.value]);
-            }
             chatForm.onsubmit = function(e){
                 e.preventDefault();
                 if(chatInput.value[0] === '/')

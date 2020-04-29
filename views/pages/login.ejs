@@ -14,6 +14,6 @@ enter a game identifier and click 'GO'.<br><br>
     var roomidInput = document.getElementById('roomid-input');
     loginForm.onsubmit = function(e){
         e.preventDefault();
-        window.location.href = roomidInput.value;
+        window.location.href = 'id-'+roomidInput.value;
     }
 </script>
