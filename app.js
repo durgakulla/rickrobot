@@ -1,24 +1,3 @@
-/*
-What the game does right now:
-- User goes to website, sees landing page asking for roomID input
-- They can type in a friend's room, or their own ID to create that room
-- They are redirected to the game url, which can be shared with friends
-- They are asked for a display name
-- They can chat only with others in their room
-
-Things to work on:
-
-- Everyone sees the same game, send from the games object only the room's object to work with that data
-- The game is all wrong
-    - Everyone should be able to control the only four pieces, not get four pieces each
-    - Fix laggy movement code, or maybe just use instantaneous movement (easier to process in mind when board has a lot of walls)
-- Random board generation, along with piece start location randomizer button
-- Add buttons so users can grab control, and show that in the chat
-- Add mobile friendly buttons for movement, and get rid of chat on mobile (probably)
-
-*/
-
-
 //use express and ejs
 var express = require('express');
 var app = express();

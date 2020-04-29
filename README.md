@@ -1,7 +1,7 @@
 ## Ricochet Robots
 Online multiplayer board game with multiple gamerooms and chat. Based on the board game designed by Alex Randolph, built with nodejs, socket.io, and express.
 
-##What the game does right now:
+## What the game does right now:
 - [x] User goes to website, sees landing page asking for roomID input
 - [x] They can type in a friend's room, or their own ID to create that room
 - [x] They are redirected to the game url, which can be shared with friends
@@ -11,7 +11,7 @@ Online multiplayer board game with multiple gamerooms and chat. Based on the boa
 - [x] Users can move pieces using arrow keys
 - [x] Everyone should be able to control the only four pieces
 
-##Things to work on:
+## Things to work on:
 - [] Add collisions with other pieces
 - [] Render persistent blocks at starting position
 - [] Random board generation, along with piece start location randomizer button
