@@ -1,7 +1,18 @@
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
+app.set('view engine', 'ejs');
 
+//this variable holds all of the games with keys
+//1. [roomid].      - mirrors the url of the game
+//each game has keys:
+//1. socket_list    - players in the room
+//2. level          - level currently in play
+//3. piecePositions - locations of each piece
+
+var games = {}
+
+//use https
 if(process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https')
@@ -11,10 +22,23 @@ if(process.env.NODE_ENV === 'production') {
   })
 }
 
-app.get('/',function(req, res) {
-    res.sendFile(__dirname + '/client/index.html');
+//if user visits main page, do the following
+app.get('/', function(req, res) {
+    res.render('pages/login.ejs');
+    //********************************
+    //TODO: have one input box on this page
+    //on submission, enter that room if it exists,
+    //or create that room!
+    //********************************
 });
-app.use('/client',express.static(__dirname + '/client'));
+
+//if user visits room url, do the following
+app.get('/:channel', function(req, res) {
+    //log that a player visited a room
+    console.log('user visited /' + req.params.channel);
+    //
+    res.render('pages/game.ejs');
+});
 
 let port = process.env.PORT;
 if (port == null || port == "") {
