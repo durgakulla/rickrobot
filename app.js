@@ -51,7 +51,6 @@ app.use('/client',express.static(__dirname + '/client'));
 
 //if the game doesn't already exist, start it. Run whenever a user visits a valid room url
 function createNewGame(roomid){
-    //TODO: add function to randomly generate a board, to be run after a new game is created, and when users push a button
     board = [
     [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
     [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 9],
@@ -90,7 +89,7 @@ function createNewGame(roomid){
     //add the roomid to the games list, along with the board, and piece positions
     games[roomid] = {
         socketsInGame: [],
-        board: board,
+        board: generateBoard(),
         currPiece: 'red',
         startingPositions: initstartingPositions,
         piecePositions: initpiecePositions,
@@ -248,6 +247,159 @@ io.sockets.on('connection', function(socket){
 
     });
 });
+
+quarterBoards = [
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,0,0,2,0,0,0,0],
+        [9,0,0,0,0,0,0,0,0],
+        [9,0,0,0,0,0,0,4,0],
+        [9,0,0,3,0,0,1,0,0],
+        [9,3,0,0,4,0,0,0,0],
+        [9,0,3,0,0,0,0,2,3],
+        [9,2,0,0,0,0,0,0,3],
+        [9,0,0,0,0,0,0,2,0],
+    ],
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,0,0,2,0,0,0,0],
+        [9,2,3,0,0,0,0,3,0],
+        [9,0,0,0,0,0,0,0,4],
+        [9,0,0,0,0,0,0,0,0],
+        [9,0,0,0,4,0,0,0,0],
+        [9,0,0,1,0,0,0,2,1],
+        [9,1,0,0,0,0,0,0,3],
+        [9,0,0,0,0,0,0,2,0],
+    ],
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,0,0,2,0,0,0,0],
+        [9,0,0,0,0,0,2,0,0],
+        [9,2,3,0,0,0,1,0,0],
+        [9,3,0,0,0,0,0,0,0],
+        [9,0,0,0,0,0,2,1,0],
+        [9,0,0,3,0,0,0,0,0],
+        [9,0,0,0,4,0,0,0,3],
+        [9,0,0,0,0,0,0,2,0],
+    ],
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,0,3,0,2,0,0,0],
+        [9,0,2,0,0,0,0,0,0],
+        [9,0,0,0,0,0,0,0,0],
+        [9,0,0,0,0,0,2,0,0],
+        [9,0,0,0,0,3,0,1,0],
+        [9,1,0,0,0,0,4,0,0],
+        [9,0,0,4,0,0,0,0,3],
+        [9,0,1,0,0,0,0,2,0],
+    ],
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,2,0,0,3,0,0,0],
+        [9,0,3,0,2,0,0,0,0],
+        [9,0,0,4,0,0,0,0,0],
+        [9,0,0,0,0,0,0,0,4],
+        [9,0,0,0,0,0,0,1,0],
+        [9,3,0,0,0,0,0,0,0],
+        [9,0,0,2,0,0,0,0,3],
+        [9,0,0,0,1,0,0,2,0],
+    ],
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,0,0,0,2,0,0,0],
+        [9,0,3,0,0,0,0,0,4],
+        [9,2,0,0,0,0,0,1,0],
+        [9,0,0,0,0,0,0,0,0],
+        [9,0,0,0,0,0,0,3,0],
+        [9,0,0,0,0,0,0,0,4],
+        [9,1,0,2,0,0,0,0,3],
+        [9,0,0,0,1,0,0,2,0],
+    ],
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,0,0,2,0,0,0,0],
+        [9,0,0,0,0,0,2,0,0],
+        [9,0,3,0,0,0,0,1,0],
+        [9,0,0,4,0,0,3,0,0],
+        [9,0,0,0,0,2,0,0,0],
+        [9,0,0,0,4,0,0,0,2],
+        [9,0,0,1,0,0,0,0,1],
+        [9,1,0,0,0,0,0,2,1],
+    ],
+    [
+        [9,9,9,9,9,9,9,9,9],
+        [9,0,0,0,0,2,0,0,0],
+        [9,0,0,0,4,0,0,0,0],
+        [9,0,0,1,0,0,0,0,0],
+        [9,0,0,0,0,0,0,3,0],
+        [9,3,0,0,0,0,2,0,0],
+        [9,0,0,0,0,0,3,0,0],
+        [9,0,0,0,0,0,0,4,3],
+        [9,0,0,0,3,4,0,2,0],
+    ],
+];
+
+//rotates an N x N matrix clockwise 90 degrees
+function rotateCW(matrix){
+    var newMatrix = [];
+    for(let i=0; i<matrix[0].length; i++) {
+        var rowToCol = matrix.map(function(value,index) { return value[i]; });
+        newMatrix.push(rowToCol.reverse());
+    }
+    for(let i=0; i<newMatrix.length; i++) {
+        for(let j=0; j<newMatrix.length; j++) {
+            if(newMatrix[i][j] == 1){
+                newMatrix[i][j] = 2;
+            }
+            else if(newMatrix[i][j] == 2){
+                newMatrix[i][j] = 3;
+            }
+            else if(newMatrix[i][j] == 3){
+                newMatrix[i][j] = 4;
+            }
+            else if(newMatrix[i][j] == 4){
+                newMatrix[i][j] = 1;
+            }
+        }
+    }
+    return newMatrix;
+}
+
+//make a random board using the prefedined (from the real game) quarterBoard pieces
+function generateBoard(){
+    remainingQuarters = [...quarterBoards];
+    quadOne = [];
+    quadTwo = [];
+    quadThree = [];
+    quadFour = []
+    //pick a quarter board to use, assign it to quadrant 1 (top left), and delete from the list
+    indexToUse = Math.floor(Math.random() * 8);
+    quadOne = quarterBoards[indexToUse];
+    remainingQuarters.splice(indexToUse, 1);
+    //pick a quarter board to use, assign it to quadrant 2 (rotate oce to top right), and delete from the list
+    indexToUse = Math.floor(Math.random() * 7);
+    quadTwo = quarterBoards[indexToUse];
+    remainingQuarters.splice(indexToUse, 1);
+    quadTwo = rotateCW(quadTwo);
+    //pick a quarter board to use, assign it to quadrant 3 (rotate twice to bottom right), and delete from the list
+    indexToUse = Math.floor(Math.random() * 6);
+    quadThree = quarterBoards[indexToUse];
+    remainingQuarters.splice(indexToUse, 1);
+    quadThree = rotateCW(rotateCW(quadThree));
+    //pick a quarter board to use, assign it to quadrant 3 (rotate thrice to bottom left)
+    indexToUse = Math.floor(Math.random() * 5);
+    quadFour = quarterBoards[indexToUse];
+    quadFour = rotateCW(rotateCW(rotateCW(quadFour)));
+    //STITCH THE FOUR QUADRANTS TOGETHER INTO BOARD PIECE TO RETURN
+    var fullBoard = [];
+    var leftHalf = quadOne.concat(quadFour);
+    var rightHalf = quadTwo.concat(quadThree);
+    for(let i=0; i<leftHalf.length; i++){
+        row = leftHalf[i].concat(rightHalf[i]);
+        fullBoard.push(row);
+    }
+    return fullBoard;
+}
 
 //Check if a game piece is immediately in the given direction relative to the current piece
 function pieceInDirection(direction, piecePosition, piecePositions){
