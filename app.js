@@ -46,29 +46,41 @@ app.get('/id-:channel', function(req, res) {
     res.render('pages/game.ejs');
 });
 
+//use the client folder to server static resources like images
+app.use('/client',express.static(__dirname + '/client'));
+
 //if the game doesn't already exist, start it. Run whenever a user visits a valid room url
 function createNewGame(roomid){
     //TODO: add function to randomly generate a board, to be run after a new game is created, and when users push a button
     board = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 9],
+    [9, 3, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9],
+    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 9],
+    [9, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 9],
+    [9, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 9],
+    [9, 4, 0, 0, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 1, 0, 0, 9],
+    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
+    [9, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9],
+    [9, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 9],
+    [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
     ];
     //TODO:add function to randomly pick the starting positions, to be run after a new game is created, and when users push button
-    startingPositions = {
+    initstartingPositions = {
+        red: [3,5],
+        green: [7,7],
+        blue: [12,7],
+        yellow: [2,13],
+        black: [6,5],
+    }
+    initpiecePositions = {
         red: [3,5],
         green: [7,7],
         blue: [12,7],
@@ -80,8 +92,8 @@ function createNewGame(roomid){
         socketsInGame: [],
         board: board,
         currPiece: 'red',
-        startingPositions: startingPositions,
-        piecePositions: startingPositions,
+        startingPositions: initstartingPositions,
+        piecePositions: initpiecePositions,
         //the startingpositions and the piece positions are the same
         //startingpositions exists so players can revert pieces to these positions
     };
@@ -147,43 +159,60 @@ io.sockets.on('connection', function(socket){
         game = games[data.roomid];
         board = games[data.roomid].board;
         piecePosition = game.piecePositions[game.currPiece];
+        piecePositions = game.piecePositions;
         if(data.inputId === 'one'){
-            games[data.roomid].currPiece = 'red';
+            game.currPiece = 'red';
         }
         else if(data.inputId === 'two'){
-            games[data.roomid].currPiece = 'green';
+            game.currPiece = 'green';
         }
         else if(data.inputId === 'three'){
-            games[data.roomid].currPiece = 'blue';
+            game.currPiece = 'blue';
         }
         else if(data.inputId === 'four'){
-            games[data.roomid].currPiece = 'yellow';
+            game.currPiece = 'yellow';
         }
         else if(data.inputId === 'left'){
-            while(board[piecePosition[0]][piecePosition[1]-1] !== 1){
+            toLeft = board[piecePosition[0]][piecePosition[1]-1];
+            onTop = board[piecePosition[0]][piecePosition[1]];
+
+            while(!(toLeft == 9 || toLeft == 2 || onTop == 4 || pieceInDirection('left', piecePosition, piecePositions))){
                 piecePosition[1] -= 1;
+                toLeft = board[piecePosition[0]][piecePosition[1]-1];
+                onTop = board[piecePosition[0]][piecePosition[1]];
             }
             game.piecePositions[game.currPiece] = piecePosition;
         }
         else if(data.inputId === 'right'){
-            while(board[piecePosition[0]][piecePosition[1]+1] !== 1){
+            toRight = board[piecePosition[0]][piecePosition[1]+1];
+            onTop = board[piecePosition[0]][piecePosition[1]];
+            while(!(toRight == 9 || toRight == 4 || onTop == 2 || pieceInDirection('right', piecePosition, piecePositions))){
                 piecePosition[1] += 1;
+                toRight = board[piecePosition[0]][piecePosition[1]+1];
+                onTop = board[piecePosition[0]][piecePosition[1]];
             }
             game.piecePositions[game.currPiece] = piecePosition;
         }
         else if(data.inputId === 'up'){
-            while(board[piecePosition[0]-1][piecePosition[1]] !== 1){
+            toUp = board[piecePosition[0]-1][piecePosition[1]];
+            onTop = board[piecePosition[0]][piecePosition[1]];
+            while(!(toUp == 9 || toUp == 3 || onTop == 1 || pieceInDirection('up', piecePosition, piecePositions))){
                 piecePosition[0] -= 1;
+                toUp = board[piecePosition[0]-1][piecePosition[1]];
+                onTop = board[piecePosition[0]][piecePosition[1]];
             }
             game.piecePositions[game.currPiece] = piecePosition;
         }
         else if(data.inputId === 'down'){
-            while(board[piecePosition[0]+1][piecePosition[1]] !== 1){
+            toDown = board[piecePosition[0]+1][piecePosition[1]];
+            onTop = board[piecePosition[0]][piecePosition[1]];
+            while(!(toDown == 9 || toDown == 1 || onTop == 3 || pieceInDirection('down', piecePosition, piecePositions))){
                 piecePosition[0] += 1;
+                toDown = board[piecePosition[0]+1][piecePosition[1]];
+                onTop = board[piecePosition[0]][piecePosition[1]];
             }
             game.piecePositions[game.currPiece] = piecePosition;
         }
-        console.log(game)
     });
 
     //at a fixed time interval, send each socket the game data for the room its in
@@ -219,3 +248,27 @@ io.sockets.on('connection', function(socket){
 
     });
 });
+
+//Check if a game piece is immediately in the given direction relative to the current piece
+function pieceInDirection(direction, piecePosition, piecePositions){
+    if (direction == 'left'){
+        locationToCheck = [piecePosition[0], piecePosition[1]-1];
+    }
+    else if (direction == 'right'){
+        locationToCheck = [piecePosition[0], piecePosition[1]+1];
+    }
+    else if (direction == 'up'){
+        locationToCheck = [piecePosition[0]-1, piecePosition[1]];
+    }
+
+    else if (direction == 'down'){
+        locationToCheck = [piecePosition[0]+1, piecePosition[1]];
+    }
+
+    for(i in piecePositions){
+        if(locationToCheck.toString() == piecePositions[i].toString()){
+            return true;
+        }
+    }
+    return false;
+}

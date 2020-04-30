@@ -9,10 +9,10 @@ Online multiplayer board game with multiple gamerooms and chat. Based on the boa
 - [x] They can chat only with others in their room
 - [x] Users can use 1,2,3,4 keys to switch between pieces
 - [x] Users can move pieces using arrow keys
-- [x] Everyone should be able to control the only four pieces
+- [x] Everyone should be able to control the four colored pieces
+- [x] The pieces move until they hit a wall
 
 ## Things to work on:
-- [] Add collisions with other pieces
 - [] Render persistent blocks at starting position
 - [] Random board generation, along with piece start location randomizer button
 - [] Add buttons so users can grab control, and show that in the chat

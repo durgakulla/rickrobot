@@ -1,19 +1,27 @@
-Welcome to ricochet robots.<br><br>
+<html>
+    <head>
+        <title>Ricochet Robots</title>
+        <link rel="stylesheet" type="text/css" href="/client/style.css">
+        <script src="jquery-3.4.1.min.js"></script>
+    </head>
+    <body>
+        <div id="main-login-wrap">
+            <h1>Ricochet Robots</h1>
+        <p>Type in room ID to create a new game, or enter your friend's room ID to join.</p>
+            <form id="login-form">
+                <label for="nme"><span>Enter a room ID.</span></label><br>
+                <input autofocus maxlength="12" type="text" name="name" class="question" id="roomid-input" required autocomplete="off" />
 
-To create a new game or join an existing game,
-enter a game identifier and click 'GO'.<br><br>
+            </form>
+        </div>
 
-<form id="login-form" style="display:inline;">
-    Room ID:<br>
-    <input id="roomid-input" type="text" style="font-size: 14;width:300px;height:50px;border: 2px solid red;border-radius: 4px;" placeholder="Enter Room ID"></input><br><br>
-    <input type="submit" value="Join">
-</form></br></br></br>
-
-<script>
-    var loginForm = document.getElementById('login-form');
-    var roomidInput = document.getElementById('roomid-input');
-    loginForm.onsubmit = function(e){
-        e.preventDefault();
-        window.location.href = 'id-'+roomidInput.value;
-    }
-</script>
+        <script>
+            var loginForm = document.getElementById('login-form');
+            var roomidInput = document.getElementById('roomid-input');
+            loginForm.onsubmit = function(e){
+                e.preventDefault();
+                window.location.href = 'id-'+roomidInput.value;
+            }
+        </script>
+    </body>
+</html>
