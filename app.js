@@ -211,9 +211,16 @@ io.sockets.on('connection', function(socket){
     //******************* ON USER DISCONNECT *******************
     socket.on('disconnect',function(){
         roomid = usersRoomid[socket.id];
-
         //do this if the roomid still exists (server refresh deletes all games so much check for this)
         if(typeof games[roomid] !== 'undefined'){
+            //tell room the user is leaving
+            currSockets = games[roomid].socketsInGame;
+            playerName = (displaynames[socket.id]);
+            for(var i in SOCKET_LIST){
+                if (currSockets.includes(parseFloat(i))){
+                    SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' is leaving...');
+                }
+            }
             //delete their socketid from the games object
             games[roomid].socketsInGame = games[roomid].socketsInGame.filter(v => v !== socket.id);
             //delete the room from games object if no other users are in it
