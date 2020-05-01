@@ -18,17 +18,18 @@
 
         <!-- display the canvas and chatbox -->
         <div id="game-wrap" style="width:800;display:none;margin: 0 auto; margin-top: 0;">
-            <div id="center" style="width:800;margin: 0 auto;"><img align="center" width="100%" src="/client/logo.png"/></div>
+            <div id="center" style="width:800;margin: 0 auto;"><img style="position:relative; left:70;" width="400px" src="/client/logo.jpg"/></div>
             <div id="canvas-wrap" style="width: 540;height: 540;position: relative;top: 0;right: 0;">
                 <canvas id="ctx" width="540" height="540" style="display:inline;"></canvas>
             </div>
-            <div id="chat-wrap" style="outline: 2px solid black;outline-offset: -2px;width:300px;height:540px;position:relative; left:540; bottom:540;">
+            <div id="chat-wrap" style="outline: 2px white black;outline-offset: -2px;width:300px;height:540px;position:relative; left:540; bottom:540;">
                 <div id="chat-text" style="width:100%;height:480px;overflow-y:scroll;display: flex;flex-direction: column-reverse;">
                 </div>
                 <form id="chat-form" style="">
-                    <input id="chat-input" type="text" style="font-size: 14;width:300px;height:50px;border-top: 2px solid black;z-index: -1000;" placeholder="Type a message..."></input>
+                    <input id="chat-input" class="question" type="text" style="width:300px;height:50px;border-top: 2px white black;z-index: -1000;" placeholder="Type a message..."></input>
                 </form>
             </div>
+            <div id="url" style="position:relative; bottom:530;z-index:100;">Send your friends this link to play: </div>
         </div>
 
         <!-- the following scripts control client game rendering -->
@@ -37,8 +38,12 @@
             //load some images
             const wall = new Image();
             wall.src = '/client/wall.png';
+            const tile = new Image();
+            tile.src = '/client/tile.png';
 
             //read in form inputs and html/canvas elements
+            var urlDiv = document.getElementById("url");
+            urlDiv.innerHTML += "<a href='" + window.location.href + "'>" + window.location.href + "</a>";
             var loginWrap = document.getElementById("login-wrap");
             var gameWrap = document.getElementById("game-wrap");
             var loginForm = document.getElementById('login-form');
@@ -48,6 +53,7 @@
             var chatForm = document.getElementById('chat-form');
             var canvas = document.getElementById("ctx");
             var ctx = document.getElementById("ctx").getContext("2d");
+            var clientname;
             //TODO: this is NOT the best way to get roomid. Improve!
             var roomid = window.location.pathname.split('id-').pop();
             var loaded = false;
@@ -59,6 +65,7 @@
             //also send the server the roomid of the room user is joining
             loginForm.onsubmit = function(e){
                 e.preventDefault();
+                clientname = nameInput.value;
                 socket.emit('sendRoomidToServer',roomid);
                 socket.emit('sendDisplaynameToServer',[nameInput.value]);
             }
@@ -82,7 +89,15 @@
 
             //Server tells client to display a chat message the room received
             socket.on('addToChat',function(data){
-                chatText.innerHTML = '<div>' + data + '</div>' + chatText.innerHTML;
+                if(data.includes(clientname+"</span>:")){
+                    chatText.innerHTML = "<div id='this-player'>" + data + '</div>' + chatText.innerHTML;
+                }
+                else{
+                    chatText.innerHTML = '<div>' + data + '</div>' + chatText.innerHTML;
+                }
+            });
+            socket.on('addToChatServer',function(data){
+                chatText.innerHTML = "<div id='server-message'>" + data + '</div>' + chatText.innerHTML;
             });
 
             //Tell server a keypress occurred, only if the user isn't using the chat
@@ -131,7 +146,7 @@
             socket.on('gameUpdate',function(games){
                 if(loaded){
                     game = games[roomid];
-                    const squareSize = canvas.width/18;
+                    const squareSize = 30;
                     //position of board's top left
                     const boardTopx = 0;
                     const boardTopy = 0;
@@ -147,9 +162,9 @@
                             }
                             else{
                                 ctx.fillStyle = "white";
-                                ctx.strokeStyle = "black";
+                                ctx.strokeStyle = "#D0D0D0";
                                 ctx.strokeRect(xOffset, yOffset, squareSize, squareSize);
-                                ctx.fillRect(xOffset, yOffset, squareSize, squareSize);
+                                ctx.drawImage(tile,xOffset, yOffset, squareSize, squareSize);
                             }
                         }
                     }
@@ -161,19 +176,21 @@
 
                             ctx.fillStyle = "black";
                             if(game.board[i][j] === 1){
-                                ctx.fillRect(xOffset, yOffset-3, squareSize+3, squareSize/5);
+                                ctx.fillRect(xOffset-3, yOffset-3, squareSize+6, squareSize/5);
                             }
                             else if(game.board[i][j] === 2){
-                                ctx.fillRect(xOffset+(squareSize-3), yOffset, squareSize/5, squareSize+3);
+                                ctx.fillRect(xOffset+(squareSize-3), yOffset-3, squareSize/5, squareSize+6);
                             }
                             else if(game.board[i][j] === 3){
-                                ctx.fillRect(xOffset, yOffset+(squareSize-3), squareSize+3, squareSize/5);
+                                ctx.fillRect(xOffset-3, yOffset+(squareSize-3), squareSize+6, squareSize/5);
                             }
                             else if(game.board[i][j] === 4){
-                                ctx.fillRect(xOffset-3, yOffset, squareSize/5, squareSize+3);
+                                ctx.fillRect(xOffset-3, yOffset-3, squareSize/5, squareSize+6);
                             }
                         }
                     }
+                    //draw the center piece
+                    ctx.fillRect(boardTopx+8*squareSize, boardTopy+8*squareSize, squareSize*2, squareSize*2);
                     //draw the border around the board
                     ctx.lineWidth = 1;
                     ctx.strokeStyle = "black";

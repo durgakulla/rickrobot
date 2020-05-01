@@ -2,6 +2,7 @@
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
+var randomWords = require('random-words');
 app.set('view engine', 'ejs');
 
 //if the port isn't specified, run it on port 2000
@@ -51,26 +52,6 @@ app.use('/client',express.static(__dirname + '/client'));
 
 //if the game doesn't already exist, start it. Run whenever a user visits a valid room url
 function createNewGame(roomid){
-    board = [
-    [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
-    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 9],
-    [9, 3, 0, 1, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9],
-    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 0, 0, 0, 9],
-    [9, 2, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 9],
-    [9, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 9],
-    [9, 4, 0, 0, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 1, 0, 0, 9],
-    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9],
-    [9, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9],
-    [9, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 9],
-    [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
-    ];
     //TODO:add function to randomly pick the starting positions, to be run after a new game is created, and when users push button
     initstartingPositions = {
         red: [3,5],
@@ -109,6 +90,7 @@ var usersRoomid = {};
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', function(socket){
     //******************* ON USER CONNECT *******************
+    socket.emit('randomRoomName',randomWords({exactly:2,join:'-'}));
     //generate a random number to assign as a socket.id to the connecting user
     socket.id = Math.random();
     //put that number into the socket_list
@@ -137,7 +119,7 @@ io.sockets.on('connection', function(socket){
         playerName = (displaynames[socket.id]);
         for(var i in SOCKET_LIST){
             if (currSockets.includes(parseFloat(i))){
-                SOCKET_LIST[i].emit('addToChat',displaynames[socket.id] + ' is joining the chat...');
+                SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' is joining...');
             }
         }
     });
@@ -148,7 +130,7 @@ io.sockets.on('connection', function(socket){
         playerName = (displaynames[socket.id]);
         for(var i in SOCKET_LIST){
             if (currSockets.includes(parseFloat(i))){
-                SOCKET_LIST[i].emit('addToChat',playerName + ': ' + data);
+                SOCKET_LIST[i].emit('addToChat',"<span id='player-name'>"+playerName+"</span>: " + data);
             }
         }
     });
@@ -229,6 +211,15 @@ io.sockets.on('connection', function(socket){
     //******************* ON USER DISCONNECT *******************
     socket.on('disconnect',function(){
         roomid = usersRoomid[socket.id];
+        //tell users in the room that this user is leaving
+        currSockets = games[roomid].socketsInGame;
+        playerName = (displaynames[socket.id]);
+        for(var i in SOCKET_LIST){
+            if (currSockets.includes(parseFloat(i))){
+                SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' is leaving...');
+            }
+        }
+
         //do this if the roomid still exists (server refresh deletes all games so much check for this)
         if(typeof games[roomid] !== 'undefined'){
             //delete their socketid from the games object

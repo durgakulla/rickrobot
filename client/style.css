@@ -8,6 +8,20 @@ html {
   height: 100%;
   overflow: hidden
 }
+/* unvisited link */
+a:link {
+  color: #BEBEBE;
+}
+
+/* visited link */
+a:visited {
+  color: #BEBEBE;
+}
+
+/* mouse over link */
+a:hover {
+  color: yellow;
+}
 #login-wrap{
     margin: 0 auto;
     width: 50%;
@@ -17,6 +31,9 @@ html {
     margin: 0 auto;
     width: 50%;
 }
+#game-wrap input, *{
+  font-size: 14px;
+}
 #chat-input{
     padding: 10px;
 }
@@ -25,11 +42,13 @@ html {
     padding-right: 10px;
     padding-bottom: 10px;
 }
+#url{
+  color: #A9A9A9;
+}
 
 body {
-
-  width: 90%;
-  max-width: 1125px;
+  color: white;
+  background-color: black;
 }
 
 h1 {
@@ -43,9 +62,30 @@ label,
 textarea {
   font-family: 'Ubuntu', sans-serif;
   display: block;
+  color: white;
   padding: 0px;
   border: none;
   font-size: 40px;
+}
+
+#player-name{
+  font-family: 'Ubuntu', sans-serif;
+  display: inline;
+  color: yellow;
+  padding: 0px;
+  border: none;
+  font-size: 14px;
+}
+#this-player span{
+  font-family: 'Ubuntu', sans-serif;
+  display: inline;
+  color: #808080;
+  padding: 0px;
+  border: none;
+  font-size: 14px;
+}
+#server-message{
+  color: red;
 }
 
 textarea:focus,
@@ -61,8 +101,8 @@ textarea.question {
   border-radius: 2px;
   margin: 0;
   border: none;
-  border-bottom: 1px solid black;
-  width: 80%;
+  border-bottom: 1px solid white;
+  width: 100%;
   background: rgba(0, 0, 0, 0);
   transition: padding-top 0.2s ease, margin-top 0.2s ease;
   overflow-x: hidden; /* Hack to make "rows" attribute apply in Firefox. */
@@ -71,6 +111,7 @@ textarea.question {
 
 input.question + label,
 textarea.question + label {
+  color: white;
   display: block;
   position: relative;
   white-space: nowrap;
@@ -102,14 +143,14 @@ input.question:focus + label > span,
 input.question:valid + label > span {
   top: -100px;
   font-size: 22px;
-  color: #333;
+  color: white;
 }
 
 textarea.question:focus + label > span,
 textarea.question:valid + label > span {
   top: -150px;
   font-size: 22px;
-  color: #333;
+  color: white;
 }
 
 input.question:valid + label,
@@ -127,7 +168,7 @@ textarea.question + label > span {
   font-weight: 300;
   margin: 0;
   position: absolute;
-  color: #8F8F8F;
+  color: white;
   font-size: 48px;
   top: -66px;
   left: 0px;
@@ -140,6 +181,7 @@ input[type="submit"] {
   -webkit-transition: opacity 0.2s ease, background 0.2s ease;
   transition: opacity 0.2s ease, background 0.2s ease;
   display: block;
+  color: black;
   opacity: 0;
   margin: 10px 0 0 0;
   padding: 10px;

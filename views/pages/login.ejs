@@ -7,17 +7,23 @@
     <body>
         <div id="main-login-wrap">
             <h1>Ricochet Robots</h1>
-        <p>Type in room ID to create a new game, or enter your friend's room ID to join.</p>
+            <p>To create a new game or join an existing game, enter a room ID and click Go!</p>
             <form id="login-form">
-                <label for="nme"><span>Enter a room ID.</span></label><br>
                 <input autofocus maxlength="12" type="text" name="name" class="question" id="roomid-input" required autocomplete="off" />
-
+                <input type="submit" value="Go!">
             </form>
         </div>
-
+        <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
         <script>
             var loginForm = document.getElementById('login-form');
             var roomidInput = document.getElementById('roomid-input');
+            var socket = io({transports: ['websocket'], upgrade: false});
+
+            socket.on('randomRoomName',function(data){
+                roomidInput.value = data;
+            });
+
+
             loginForm.onsubmit = function(e){
                 e.preventDefault();
                 window.location.href = 'id-'+roomidInput.value;

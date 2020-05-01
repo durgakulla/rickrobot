@@ -1,0 +1,210 @@
+
+<!-- saved from url=(0037)http://localhost:2000/id-line-usually -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Ricochet Robots</title>
+        <link rel="stylesheet" type="text/css" href="./j_files/style.css">
+        <script src="./j_files/jquery-3.4.1.min.js"></script>
+    </head>
+    <body class="vsc-initialized">
+
+        <!-- Ask for username to display in the chat -->
+        <div id="login-wrap" style="display: none;">
+            <br><br><br>
+            <form id="login-form">
+                <label for="nme"><span>Enter a display name.</span></label><br>
+                <input autofocus="" maxlength="12" type="text" name="name" class="question" id="name-input" required="" autocomplete="off">
+
+            </form>
+        </div>
+
+        <!-- display the canvas and chatbox -->
+        <div id="game-wrap" style="width: 800px; display: block; margin: 0px auto;">
+            <div id="center" style="width:800;margin: 0 auto;"><img style="position:relative; left:70;" width="400px" src="./j_files/logo.jpg"></div>
+            <div id="canvas-wrap" style="width: 540;height: 540;position: relative;top: 0;right: 0;">
+                <canvas id="ctx" width="540" height="540" style="display:inline;"></canvas>
+            </div>
+            <div id="chat-wrap" style="outline: 2px white black;outline-offset: -2px;width:300px;height:540px;position:relative; left:540; bottom:540;">
+                <div id="chat-text" style="width:100%;height:480px;overflow-y:scroll;display: flex;flex-direction: column-reverse;"><div id="this-player"><span id="player-name">asdf</span>: asdf'a</div><div><span id="player-name">aaaa</span>: qwj</div><div><span id="player-name">aaaa</span>: weqjt </div><div><span id="player-name">aaaa</span>: ewjt </div><div><span id="player-name">aaaa</span>: sadg;avkt</div><div><span id="player-name">aaaa</span>: asdf</div><div><span id="player-name">aaaa</span>: asdf</div><div>aaaa is joining the chat...</div><div id="this-player"><span id="player-name">asdf</span>: vt</div><div id="this-player"><span id="player-name">asdf</span>: 'vert</div><div id="this-player"><span id="player-name">asdf</span>: sdg</div><div id="this-player"><span id="player-name">asdf</span>: asdg</div><div id="this-player"><span id="player-name">asdf</span>: asdf</div><div id="this-player"><span id="player-name">asdf</span>: as</div><div id="this-player"><span id="player-name">asdf</span>: asdf</div><div id="this-player"><span id="player-name">asdf</span>: dsaf</div><div id="this-player"><span id="player-name">asdf</span>: adsf</div><div id="this-player"><span id="player-name">asdf</span>: asdf</div><div id="this-player"><span id="player-name">asdf</span>: sdf</div><div id="this-player"><span id="player-name">asdf</span>: WHa</div><div>asdf is joining the chat...</div>
+                </div>
+                <form id="chat-form" style="">
+                    <input id="chat-input" class="question" type="text" style="width:300px;height:50px;border-top: 2px white black;z-index: -1000;" placeholder="Type a message...">
+                </form>
+            </div>
+            <div id="url" style="position:relative; bottom:530;z-index:100;">Send your friends this link to play: <a href="http://localhost:2000/id-line-usually">http://localhost:2000/id-line-usually</a></div>
+        </div>
+
+        <!-- the following scripts control client game rendering -->
+        <script src="./j_files/socket.io-1.4.5.js"></script>
+        <script>
+            //load some images
+            const wall = new Image();
+            wall.src = '/client/wall.png';
+            const tile = new Image();
+            tile.src = '/client/tile.png';
+
+            //read in form inputs and html/canvas elements
+            var urlDiv = document.getElementById("url");
+            urlDiv.innerHTML += "<a href='" + window.location.href + "'>" + window.location.href + "</a>";
+            var loginWrap = document.getElementById("login-wrap");
+            var gameWrap = document.getElementById("game-wrap");
+            var loginForm = document.getElementById('login-form');
+            var nameInput = document.getElementById('name-input');
+            var chatText = document.getElementById('chat-text');
+            var chatInput = document.getElementById('chat-input');
+            var chatForm = document.getElementById('chat-form');
+            var canvas = document.getElementById("ctx");
+            var ctx = document.getElementById("ctx").getContext("2d");
+            var clientname;
+            //TODO: this is NOT the best way to get roomid. Improve!
+            var roomid = window.location.pathname.split('id-').pop();
+            var loaded = false;
+
+            //start socket
+            var socket = io({transports: ['websocket'], upgrade: false});
+
+            //when a user provides their displayname, send to server
+            //also send the server the roomid of the room user is joining
+            loginForm.onsubmit = function(e){
+                e.preventDefault();
+                clientname = nameInput.value;
+                socket.emit('sendRoomidToServer',roomid);
+                socket.emit('sendDisplaynameToServer',[nameInput.value]);
+            }
+
+            //Server tells client to showboard after user submits their display name
+            socket.on('showBoard',function(){
+                loginWrap.style.display = "none";
+                gameWrap.style.display = "block";
+                loaded = true;
+            });
+
+            //Send a chat message to the server
+            chatForm.onsubmit = function(e){
+                e.preventDefault();
+                if(chatInput.value[0] === '/')
+                    socket.emit('evalServer',chatInput.value.slice(1));
+                else
+                    socket.emit('sendMsgToServer',chatInput.value);
+                chatInput.value = '';
+            }
+
+            //Server tells client to display a chat message the room received
+            socket.on('addToChat',function(data){
+                if(data.includes(clientname+"</span>:")){
+                    chatText.innerHTML = "<div id='this-player'>" + data + '</div>' + chatText.innerHTML;
+                }
+                else{
+                    chatText.innerHTML = '<div>' + data + '</div>' + chatText.innerHTML;
+                }
+            });
+
+            //Tell server a keypress occurred, only if the user isn't using the chat
+            document.onkeydown = function(event){
+                if(document.activeElement.tagName != 'INPUT'){
+                    if(event.keyCode === 39)    //arrow right
+                        socket.emit('keyPress',{roomid: roomid, inputId:'right',state:true});
+                    else if(event.keyCode === 40)   //arrow down
+                        socket.emit('keyPress',{roomid: roomid, inputId:'down',state:true});
+                    else if(event.keyCode === 37) //arrow left
+                        socket.emit('keyPress',{roomid: roomid, inputId:'left',state:true});
+                    else if(event.keyCode === 38) // arrow up
+                        socket.emit('keyPress',{roomid: roomid, inputId:'up',state:true});
+                    else if(event.keyCode === 49) // 1
+                        socket.emit('keyPress',{roomid: roomid, inputId:'one',state:true});
+                    else if(event.keyCode === 50) // 2
+                        socket.emit('keyPress',{roomid: roomid, inputId:'two',state:true});
+                    else if(event.keyCode === 51) // 3
+                        socket.emit('keyPress',{roomid: roomid, inputId:'three',state:true});
+                    else if(event.keyCode === 52) // 4
+                        socket.emit('keyPress',{roomid: roomid, inputId:'four',state:true});
+                }
+            }
+            //Tell server a keypress has ended, only if the user isn't using the chat
+            document.onkeyup = function(event){
+                if(document.activeElement.tagName != 'INPUT'){
+                    if(event.keyCode === 39)    //arrow right
+                        socket.emit('keyPress',{roomid: roomid, inputId:'right',state:false});
+                    else if(event.keyCode === 40)   //arrow down
+                        socket.emit('keyPress',{roomid: roomid, inputId:'down',state:false});
+                    else if(event.keyCode === 37) //arrow left
+                        socket.emit('keyPress',{roomid: roomid, inputId:'left',state:false});
+                    else if(event.keyCode === 38) // arrow up
+                        socket.emit('keyPress',{roomid: roomid, inputId:'up',state:false});
+                    else if(event.keyCode === 49) // 1
+                        socket.emit('keyPress',{roomid: roomid, inputId:'one',state:false});
+                    else if(event.keyCode === 50) // 2
+                        socket.emit('keyPress',{roomid: roomid, inputId:'two',state:false});
+                    else if(event.keyCode === 51) // 3
+                        socket.emit('keyPress',{roomid: roomid, inputId:'three',state:false});
+                    else if(event.keyCode === 52) // 4
+                        socket.emit('keyPress',{roomid: roomid, inputId:'four',state:false});
+                }
+            }
+
+            socket.on('gameUpdate',function(games){
+                if(loaded){
+                    game = games[roomid];
+                    const squareSize = 30;
+                    //position of board's top left
+                    const boardTopx = 0;
+                    const boardTopy = 0;
+                    //draw each square on the board
+                    for(let i=0; i<game.board.length; i++) {
+                        for(let j=0; j<game.board[0].length; j++) {
+                            let xOffset = boardTopx + j*squareSize;
+                            let yOffset = boardTopy + i*squareSize;
+                            ctx.lineWidth = 1.5;
+                            if(game.board[i][j] === 9){
+                                ctx.fillStyle = "black";
+                                ctx.drawImage(wall,xOffset, yOffset, squareSize, squareSize);
+                            }
+                            else{
+                                ctx.fillStyle = "white";
+                                ctx.strokeStyle = "#D0D0D0";
+                                ctx.strokeRect(xOffset, yOffset, squareSize, squareSize);
+                                ctx.drawImage(tile,xOffset, yOffset, squareSize, squareSize);
+                            }
+                        }
+                    }
+                    //draw each square on the board
+                    for(let i=0; i<game.board.length; i++) {
+                        for(let j=0; j<game.board[0].length; j++) {
+                            let xOffset = boardTopx + j*squareSize;
+                            let yOffset = boardTopy + i*squareSize;
+
+                            ctx.fillStyle = "black";
+                            if(game.board[i][j] === 1){
+                                ctx.fillRect(xOffset-3, yOffset-3, squareSize+6, squareSize/5);
+                            }
+                            else if(game.board[i][j] === 2){
+                                ctx.fillRect(xOffset+(squareSize-3), yOffset-3, squareSize/5, squareSize+6);
+                            }
+                            else if(game.board[i][j] === 3){
+                                ctx.fillRect(xOffset-3, yOffset+(squareSize-3), squareSize+6, squareSize/5);
+                            }
+                            else if(game.board[i][j] === 4){
+                                ctx.fillRect(xOffset-3, yOffset-3, squareSize/5, squareSize+6);
+                            }
+                        }
+                    }
+                    //draw the center piece
+                    ctx.fillRect(boardTopx+8*squareSize, boardTopy+8*squareSize, squareSize*2, squareSize*2);
+                    //draw the border around the board
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "black";
+                    ctx.strokeRect(boardTopx+squareSize-ctx.lineWidth/2, boardTopy+squareSize-ctx.lineWidth/2, squareSize*game.board.length-squareSize*2+ctx.lineWidth, squareSize*game.board.length-squareSize*2+ctx.lineWidth)
+                    //draw each game piece
+                    for(piece in game.piecePositions){
+                        let yOffset = boardTopy + game.piecePositions[piece][0]*squareSize;
+                        let xOffset = boardTopx + game.piecePositions[piece][1]*squareSize;
+                        ctx.fillStyle = piece;
+                        ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                    }
+                }
+
+            }), 1000;
+
+        </script>
+    
+
+</body></html>

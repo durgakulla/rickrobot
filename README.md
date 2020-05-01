@@ -13,12 +13,12 @@ Online multiplayer board game with multiple gamerooms and chat. Based on the boa
 - [x] The pieces move until they hit a wall
 
 ## Things to work on:
-- [] Render persistent blocks at starting position
-- [] Random board generation, along with piece start location randomizer button
-- [] Add buttons so users can grab control, and show that in the chat
-- [] Add mobile friendly buttons for movement, and get rid of chat on mobile (probably)
-- [] Send only current gama data to sockets instead of all games
-- [] Improve movement code to include visual transitions
-- [] Make user elements pretty
-- [] Add more server messages to chat (player leaving, player taking control)
-- [] Add timer and other board game elements
+- [ ] Render persistent blocks at starting position
+- [ ] Random board generation, along with piece start location randomizer button
+- [ ] Add buttons so users can grab control, and show that in the chat
+- [ ] Add mobile friendly buttons for movement, and get rid of chat on mobile (probably)
+- [ ] Send only current gama data to sockets instead of all games
+- [ ] Improve movement code to include visual transitions
+- [ ] Make user elements pretty
+- [ ] Add more server messages to chat (player leaving, player taking control)
+- [ ] Add timer and other board game elements
