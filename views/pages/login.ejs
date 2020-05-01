@@ -19,6 +19,7 @@
             var roomidInput = document.getElementById('roomid-input');
             var socket = io({transports: ['websocket'], upgrade: false});
 
+
             socket.on('randomRoomName',function(data){
                 roomidInput.value = data;
             });
