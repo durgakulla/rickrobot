@@ -453,7 +453,6 @@ function setGoalPosition(board, pieceStartPositions){
         color: thePiece,
         position: theGoal,
     }
-    console.log(goalColorPosition);
     return(goalColorPosition);
 }
 
