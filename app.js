@@ -67,6 +67,7 @@ function createNewGame(roomid){
         startingPositions: startPositions,
         piecePositions: piecePositions,
         goalColorPosition: goalPosition,
+        timer: 0,
         //the startingpositions and the piece positions are the same
         //startingpositions exists so players can revert pieces to these positions
         //goalColorPosition is an object that contains keys:
@@ -84,6 +85,7 @@ function createNewLevel(roomid){
     games[roomid].startingPositions = startPositions;
     games[roomid].piecePositions = piecePositions;
     games[roomid].goalColorPosition = setGoalPosition(board,startPositions);
+    games[roomid].timer = 0;
 }
 
 //this object holds the socket information of the users connected to any game
@@ -94,6 +96,15 @@ var displaynames = {};
 var usersRoomid = {};
 
 ////******************* SENDING AND RECEIVING DATA TO/FROM CLIENT *******************
+//tick the timer down one second if it's greater than 0
+setInterval(function(){
+    for(var i in games){
+        if(games[i].timer !== 0){
+            games[i].timer -= 1;
+        }
+    }
+},1000);
+
 var io = require('socket.io')(serv,{});
 io.sockets.on('connection', function(socket){
     //******************* ON USER CONNECT *******************
@@ -208,6 +219,10 @@ io.sockets.on('connection', function(socket){
         }
     });
 
+    //starts a one minute timer in the room
+    socket.on('startTimer',function(roomid){
+        games[roomid].timer = 60;
+    });
     //reset pieces to start position
     socket.on('resetPieces',function(roomid){
         startingPositions = JSON.parse(JSON.stringify(games[roomid].startingPositions));
@@ -220,6 +235,7 @@ io.sockets.on('connection', function(socket){
     });
 
     //at a fixed time interval, send each socket the game data for the room its in
+    //TODO: to each socket, only emit from the game object their roomid
     setInterval(function(){
         socket.emit('gameUpdate',games);
         /*
@@ -229,7 +245,6 @@ io.sockets.on('connection', function(socket){
         }
         */
     },50);
-
 
     //******************* ON USER DISCONNECT *******************
     socket.on('disconnect',function(){
