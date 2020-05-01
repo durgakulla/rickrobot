@@ -11,7 +11,7 @@
             <br><br><br>
             <form id="login-form">
                 <label for="nme"><span>Enter a display name.</span></label><br>
-                <input autofocus maxlength="12" type="text" name="name" class="question" id="name-input" required autocomplete="off" />
+                <input autofocus type="text" name="name" class="question" id="name-input" required autocomplete="off" />
                 <input type="submit" value="Play">
             </form>
         </div>
@@ -246,16 +246,16 @@
                         let yOffset = boardTopy + game.piecePositions[piece][0]*squareSize;
                         let xOffset = boardTopx + game.piecePositions[piece][1]*squareSize;
                         if(piece =='red'){
-                            ctx.drawImage(redpiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                            ctx.drawImage(redpiece, xOffset, yOffset, squareSize, squareSize);
                         }
                         else if(piece =='green'){
-                            ctx.drawImage(greenpiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                            ctx.drawImage(greenpiece, xOffset, yOffset, squareSize, squareSize);
                         }
                         else if(piece =='blue'){
-                            ctx.drawImage(bluepiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                            ctx.drawImage(bluepiece, xOffset, yOffset, squareSize, squareSize);
                         }
                         else if(piece =='yellow'){
-                            ctx.drawImage(yellowpiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                            ctx.drawImage(yellowpiece, xOffset, yOffset, squareSize, squareSize);
                         }
                         else if(piece =='black'){
                             ctx.fillStyle = piece;
