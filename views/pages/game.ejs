@@ -28,7 +28,7 @@
                 <form id="chat-form" style="">
                     <input id="chat-input" class="question" type="text" style="width:300px;height:50px;border-top: 2px white black;z-index: -1000;" placeholder="Type a message..."></input>
                 </form>
-                <button type="button" id="new-game">New Game</button>
+                <button type="button" id="reset-pieces">Reset Pieces</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" id="new-game">New Level</button>
             </div>
         </div>
 
@@ -36,10 +36,20 @@
         <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
         <script>
             //load some images
+            const border = new Image();
+            border.src = '/client/border.png';
             const wall = new Image();
             wall.src = '/client/wall.png';
             const tile = new Image();
             tile.src = '/client/tile.png';
+            const redpiece = new Image();
+            redpiece.src = '/client/red.png';
+            const greenpiece = new Image();
+            greenpiece.src = '/client/green.png';
+            const bluepiece = new Image();
+            bluepiece.src = '/client/blue.png';
+            const yellowpiece = new Image();
+            yellowpiece.src = '/client/yellow.png';
 
             //read in form inputs and html/canvas elements
             var loginWrap = document.getElementById("login-wrap");
@@ -156,7 +166,7 @@
                             ctx.lineWidth = 1.5;
                             if(game.board[i][j] === 9){
                                 ctx.fillStyle = "black";
-                                ctx.drawImage(wall,xOffset, yOffset, squareSize, squareSize);
+                                ctx.drawImage(border,xOffset, yOffset, squareSize, squareSize);
                             }
                             else{
                                 ctx.fillStyle = "white";
@@ -174,64 +184,64 @@
 
                             ctx.fillStyle = "black";
                             if(game.board[i][j] === 1){
-                                ctx.fillRect(xOffset-3, yOffset-3, squareSize+6, squareSize/5);
+                                ctx.drawImage(wall, xOffset-3, yOffset-3, squareSize+6, squareSize/5);
                             }
                             else if(game.board[i][j] === 2){
-                                ctx.fillRect(xOffset+(squareSize-3), yOffset-3, squareSize/5, squareSize+6);
+                                ctx.drawImage(wall, xOffset+(squareSize-3), yOffset-3, squareSize/5, squareSize+6);
                             }
                             else if(game.board[i][j] === 3){
-                                ctx.fillRect(xOffset-3, yOffset+(squareSize-3), squareSize+6, squareSize/5);
+                                ctx.drawImage(wall, xOffset-3, yOffset+(squareSize-3), squareSize+6, squareSize/5);
                             }
                             else if(game.board[i][j] === 4){
-                                ctx.fillRect(xOffset-3, yOffset-3, squareSize/5, squareSize+6);
+                                ctx.drawImage(wall, xOffset-3, yOffset-3, squareSize/5, squareSize+6);
                             }
                         }
                     }
                     //draw the center piece
                     ctx.fillRect(boardTopx+8*squareSize, boardTopy+8*squareSize, squareSize*2, squareSize*2);
                     //draw the border around the board
-                    ctx.lineWidth = 1;
+                    ctx.lineWidth = 4;
                     ctx.strokeStyle = "black";
                     ctx.strokeRect(boardTopx+squareSize-ctx.lineWidth/2, boardTopy+squareSize-ctx.lineWidth/2, squareSize*game.board.length-squareSize*2+ctx.lineWidth, squareSize*game.board.length-squareSize*2+ctx.lineWidth)
-                    //draw each game piece
-                    for(piece in game.piecePositions){
-                        let yOffset = boardTopy + game.piecePositions[piece][0]*squareSize;
-                        let xOffset = boardTopx + game.piecePositions[piece][1]*squareSize;
-                        if(piece=='red'){
-                            ctx.fillStyle = piece;
-                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
-                        }
-                        else if(piece=='green'){
-                            ctx.fillStyle = piece;
-                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
-                        }
-                        else if(piece=='blue'){
-                            ctx.fillStyle = piece;
-                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
-                        }
-                        else if(piece=='yellow'){
-                            ctx.fillStyle = piece;
-                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
-                        }
-                        else if(piece=='black'){
-                            ctx.fillStyle = piece;
-                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
-                        }
-                    }
                     //draw the goal. bigger size is smaller.
                     goalsize = 1.5;
                     ctx.fillStyle = game.goalColorPosition.color;
                     ctx.globalAlpha = 0.6;
                     ctx.fillRect(boardTopx+game.goalColorPosition.position[1]*squareSize+((squareSize-squareSize/goalsize)/2), boardTopy+game.goalColorPosition.position[0]*squareSize+((squareSize-squareSize/goalsize)/2), squareSize/goalsize, squareSize/goalsize);
                     ctx.globalAlpha = 1.0;
+                    //draw each game piece
+                    for(piece in game.piecePositions){
+                        let yOffset = boardTopy + game.piecePositions[piece][0]*squareSize;
+                        let xOffset = boardTopx + game.piecePositions[piece][1]*squareSize;
+                        if(piece =='red'){
+                            ctx.drawImage(redpiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
+                        else if(piece =='green'){
+                            ctx.drawImage(greenpiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
+                        else if(piece =='blue'){
+                            ctx.drawImage(bluepiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
+                        else if(piece =='yellow'){
+                            ctx.drawImage(yellowpiece, xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
+                        else if(piece =='black'){
+                            ctx.fillStyle = piece;
+                            ctx.drawImage(border,xOffset, yOffset, squareSize, squareSize);
+                        }
+                    }
                 }
 
 
 
-
+            //when button is pressed, tell server to move pieces back to starting position
+            var resetbutton = document.getElementById('reset-pieces');
+            resetbutton.onclick = function(){
+                 socket.emit('resetPieces',roomid);
+            }
             //when button is pressed, tell server to serve a new level
-            var refreshbutton = document.getElementById('new-game');
-            refreshbutton.onclick = function(){
+            var newgamebutton = document.getElementById('new-game');
+            newgamebutton.onclick = function(){
                  socket.emit('newLevel',roomid);
             }
 

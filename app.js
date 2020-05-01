@@ -208,6 +208,12 @@ io.sockets.on('connection', function(socket){
         }
     });
 
+    //reset pieces to start position
+    socket.on('resetPieces',function(roomid){
+        startingPositions = JSON.parse(JSON.stringify(games[roomid].startingPositions));
+        games[roomid].piecePositions = startingPositions;
+    });
+
     //produce a new level
     socket.on('newLevel',function(roomid){
         createNewLevel(roomid);
