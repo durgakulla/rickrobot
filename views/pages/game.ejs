@@ -12,13 +12,13 @@
             <form id="login-form">
                 <label for="nme"><span>Enter a display name.</span></label><br>
                 <input autofocus maxlength="12" type="text" name="name" class="question" id="name-input" required autocomplete="off" />
-
+                <input type="submit" value="Play">
             </form>
         </div>
 
         <!-- display the canvas and chatbox -->
         <div id="game-wrap" style="width:800;display:none;margin: 0 auto; margin-top: 0;">
-            <div id="center" style="width:800;margin: 0 auto;"><img style="position:relative; left:70;" width="400px" src="/client/logo.jpg"/></div>
+            <div id="center" style="width:800;margin: 0 auto;"><a href="/"><img style="position:relative; left:70;" width="400px" src="/client/logo.jpg"/></a></div>
             <div id="canvas-wrap" style="width: 540;height: 540;position: relative;top: 0;right: 0;">
                 <canvas id="ctx" width="540" height="540" style="display:inline;"></canvas>
             </div>
@@ -28,8 +28,8 @@
                 <form id="chat-form" style="">
                     <input id="chat-input" class="question" type="text" style="width:300px;height:50px;border-top: 2px white black;z-index: -1000;" placeholder="Type a message..."></input>
                 </form>
+                <button type="button" id="new-game">New Game</button>
             </div>
-            <div id="url" style="position:relative; bottom:530;z-index:100;">Send your friends this link to play: </div>
         </div>
 
         <!-- the following scripts control client game rendering -->
@@ -42,8 +42,6 @@
             tile.src = '/client/tile.png';
 
             //read in form inputs and html/canvas elements
-            var urlDiv = document.getElementById("url");
-            urlDiv.innerHTML += "<a href='" + window.location.href + "'>" + window.location.href + "</a>";
             var loginWrap = document.getElementById("login-wrap");
             var gameWrap = document.getElementById("game-wrap");
             var loginForm = document.getElementById('login-form');
@@ -150,7 +148,7 @@
                     //position of board's top left.
                     const boardTopx = 0;
                     const boardTopy = 0;
-                    //draw each square on the board
+                    //draw the outside walls
                     for(let i=0; i<game.board.length; i++) {
                         for(let j=0; j<game.board[0].length; j++) {
                             let xOffset = boardTopx + j*squareSize;
@@ -168,7 +166,7 @@
                             }
                         }
                     }
-                    //draw each square on the board
+                    //draw the walls
                     for(let i=0; i<game.board.length; i++) {
                         for(let j=0; j<game.board[0].length; j++) {
                             let xOffset = boardTopx + j*squareSize;
@@ -199,10 +197,39 @@
                     for(piece in game.piecePositions){
                         let yOffset = boardTopy + game.piecePositions[piece][0]*squareSize;
                         let xOffset = boardTopx + game.piecePositions[piece][1]*squareSize;
-                        ctx.fillStyle = piece;
-                        ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        if(piece=='red'){
+                            ctx.fillStyle = piece;
+                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
+                        else if(piece=='green'){
+                            ctx.fillStyle = piece;
+                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
+                        else if(piece=='blue'){
+                            ctx.fillStyle = piece;
+                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
+                        else if(piece=='black'){
+                            ctx.fillStyle = piece;
+                            ctx.fillRect(xOffset+squareSize/6, yOffset+squareSize/6, squareSize/1.5, squareSize/1.5);
+                        }
                     }
+                    //draw the goal. bigger size is smaller.
+                    goalsize = 1.5;
+                    ctx.fillStyle = game.goalColorPosition.color;
+                    ctx.globalAlpha = 0.6;
+                    ctx.fillRect(boardTopx+game.goalColorPosition.position[1]*squareSize+((squareSize-squareSize/goalsize)/2), boardTopy+game.goalColorPosition.position[0]*squareSize+((squareSize-squareSize/goalsize)/2), squareSize/goalsize, squareSize/goalsize);
+                    ctx.globalAlpha = 1.0;
                 }
+
+
+
+
+            //when button is pressed, tell server to serve a new level
+            var refreshbutton = document.getElementById('new-game');
+            refreshbutton.onclick = function(){
+                 socket.emit('newLevel',roomid);
+            }
 
             }), 1000;
 

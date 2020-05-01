@@ -5,6 +5,9 @@ var serv = require('http').Server(app);
 var randomWords = require('random-words');
 app.set('view engine', 'ejs');
 
+//domain name to be used in code.
+var domain = "rickrobot.herokuapp.com";
+
 //if the port isn't specified, run it on port 2000
 let port = process.env.PORT;
 if (port == null || port == "") {
@@ -52,31 +55,35 @@ app.use('/client',express.static(__dirname + '/client'));
 
 //if the game doesn't already exist, start it. Run whenever a user visits a valid room url
 function createNewGame(roomid){
-    //TODO:add function to randomly pick the starting positions, to be run after a new game is created, and when users push button
-    initstartingPositions = {
-        red: [3,5],
-        green: [7,7],
-        blue: [12,7],
-        yellow: [2,13],
-        black: [6,5],
-    }
-    initpiecePositions = {
-        red: [3,5],
-        green: [7,7],
-        blue: [12,7],
-        yellow: [2,13],
-        black: [6,5],
-    }
     //add the roomid to the games list, along with the board, and piece positions
+    board = generateBoard();
+    startPositions = setStartPositions(board);
+    piecePositions = JSON.parse(JSON.stringify(startPositions));
+    goalPosition = setGoalPosition(board, startPositions);
     games[roomid] = {
         socketsInGame: [],
-        board: generateBoard(),
+        board: board,
         currPiece: 'red',
-        startingPositions: initstartingPositions,
-        piecePositions: initpiecePositions,
+        startingPositions: startPositions,
+        piecePositions: piecePositions,
+        goalColorPosition: goalPosition,
         //the startingpositions and the piece positions are the same
         //startingpositions exists so players can revert pieces to these positions
+        //goalColorPosition is an object that contains keys:
+        //1. color - string, which color needs to reach goal
+        //2. position - array, position where the goal is
     };
+}
+
+//when the users indicate, create a new level to display by modifying the game object (key = their room id)
+function createNewLevel(roomid){
+    board = generateBoard();
+    startPositions = setStartPositions(board);
+    piecePositions = JSON.parse(JSON.stringify(startPositions));
+    games[roomid].board = board;
+    games[roomid].startingPositions = startPositions;
+    games[roomid].piecePositions = piecePositions;
+    games[roomid].goalColorPosition = setGoalPosition(board,startPositions);
 }
 
 //this object holds the socket information of the users connected to any game
@@ -116,12 +123,17 @@ io.sockets.on('connection', function(socket){
 
         //tell users in the room that this new user joined
         currSockets = games[usersRoomid[socket.id]].socketsInGame;
+        currRoomid = usersRoomid[socket.id];
         playerName = (displaynames[socket.id]);
         for(var i in SOCKET_LIST){
             if (currSockets.includes(parseFloat(i))){
-                SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' is joining...');
+                SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' has joined the game');
             }
         }
+        if(currSockets.length == 1){
+        SOCKET_LIST[socket.id].emit('addToChatServer',"Send your friends the link so they can join! <a href='https://" + domain + "/id-" + currRoomid + "'>" + domain + "/id-" + currRoomid + "</a>");
+        }
+
     });
 
     //when server receives message from user, send only to users in the same roomid
@@ -196,13 +208,18 @@ io.sockets.on('connection', function(socket){
         }
     });
 
+    //produce a new level
+    socket.on('newLevel',function(roomid){
+        createNewLevel(roomid);
+    });
+
     //at a fixed time interval, send each socket the game data for the room its in
     setInterval(function(){
         socket.emit('gameUpdate',games);
         /*
-        for(var socketid in displaynames){
-            pack = games[usersRoomid[socketid]];
-            socket.emit('gameUpdate',pack);
+        for(var i in SOCKET_LIST){
+            pack = games[usersRoomid[i]];
+            SOCKET_LIST[i].emit('gameUpdate',pack);
         }
         */
     },50);
@@ -218,7 +235,7 @@ io.sockets.on('connection', function(socket){
             playerName = (displaynames[socket.id]);
             for(var i in SOCKET_LIST){
                 if (currSockets.includes(parseFloat(i))){
-                    SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' is leaving...');
+                    SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' has left the game');
                 }
             }
             //delete their socketid from the games object
@@ -243,89 +260,89 @@ quarterBoards = [
         [9,9,9,9,9,9,9,9,9],
         [9,0,0,0,2,0,0,0,0],
         [9,0,0,0,0,0,0,0,0],
-        [9,0,0,0,0,0,0,4,0],
+        [9,0,0,0,0,0,5,4,0],
         [9,0,0,3,0,0,1,0,0],
-        [9,3,0,0,4,0,0,0,0],
-        [9,0,3,0,0,0,0,2,3],
-        [9,2,0,0,0,0,0,0,3],
-        [9,0,0,0,0,0,0,2,0],
+        [9,3,0,5,4,0,0,2,5],
+        [9,0,3,0,0,0,0,0,1],
+        [9,2,5,0,0,0,0,0,3],
+        [9,0,0,0,0,0,0,2,9],
     ],
     [
         [9,9,9,9,9,9,9,9,9],
         [9,0,0,0,2,0,0,0,0],
-        [9,2,3,0,0,0,0,3,0],
-        [9,0,0,0,0,0,0,0,4],
+        [9,2,5,0,0,0,0,3,0],
+        [9,0,1,0,0,0,0,5,4],
         [9,0,0,0,0,0,0,0,0],
-        [9,0,0,0,4,0,0,0,0],
-        [9,0,0,1,0,0,0,2,1],
+        [9,0,0,5,4,0,0,0,3],
+        [9,0,0,1,0,0,0,2,5],
         [9,1,0,0,0,0,0,0,3],
-        [9,0,0,0,0,0,0,2,0],
+        [9,0,0,0,0,0,0,2,9],
     ],
     [
         [9,9,9,9,9,9,9,9,9],
         [9,0,0,0,2,0,0,0,0],
-        [9,0,0,0,0,0,2,0,0],
-        [9,2,3,0,0,0,1,0,0],
-        [9,3,0,0,0,0,0,0,0],
-        [9,0,0,0,0,0,2,1,0],
+        [9,0,0,0,0,0,5,4,0],
+        [9,2,5,0,0,0,1,0,0],
+        [9,3,1,0,0,0,0,3,0],
+        [9,0,0,0,0,0,2,5,0],
         [9,0,0,3,0,0,0,0,0],
-        [9,0,0,0,4,0,0,0,3],
-        [9,0,0,0,0,0,0,2,0],
+        [9,0,0,5,4,0,0,0,3],
+        [9,0,0,0,0,0,0,2,9],
     ],
     [
         [9,9,9,9,9,9,9,9,9],
         [9,0,0,3,0,2,0,0,0],
-        [9,0,2,0,0,0,0,0,0],
+        [9,0,2,5,0,0,0,0,0],
         [9,0,0,0,0,0,0,0,0],
-        [9,0,0,0,0,0,2,0,0],
+        [9,0,0,0,0,0,2,5,0],
         [9,0,0,0,0,3,0,1,0],
-        [9,1,0,0,0,0,4,0,0],
-        [9,0,0,4,0,0,0,0,3],
-        [9,0,1,0,0,0,0,2,0],
+        [9,1,0,0,0,5,4,0,0],
+        [9,0,5,4,0,0,0,0,3],
+        [9,0,1,0,0,0,0,2,9],
     ],
     [
         [9,9,9,9,9,9,9,9,9],
         [9,0,2,0,0,3,0,0,0],
-        [9,0,3,0,2,0,0,0,0],
-        [9,0,0,4,0,0,0,0,0],
-        [9,0,0,0,0,0,0,0,4],
+        [9,0,3,0,2,5,0,0,0],
+        [9,0,5,4,0,0,0,0,0],
+        [9,0,0,0,0,0,0,5,4],
         [9,0,0,0,0,0,0,1,0],
         [9,3,0,0,0,0,0,0,0],
-        [9,0,0,2,0,0,0,0,3],
-        [9,0,0,0,1,0,0,2,0],
+        [9,0,0,2,5,0,0,0,3],
+        [9,0,0,0,1,0,0,2,9],
     ],
     [
         [9,9,9,9,9,9,9,9,9],
         [9,0,0,0,0,2,0,0,0],
-        [9,0,3,0,0,0,0,0,4],
-        [9,2,0,0,0,0,0,1,0],
+        [9,0,3,0,0,0,0,5,4],
+        [9,2,5,0,0,0,0,1,0],
         [9,0,0,0,0,0,0,0,0],
         [9,0,0,0,0,0,0,3,0],
-        [9,0,0,0,0,0,0,0,4],
-        [9,1,0,2,0,0,0,0,3],
-        [9,0,0,0,1,0,0,2,0],
+        [9,0,0,0,0,0,0,5,4],
+        [9,1,0,2,5,0,0,0,3],
+        [9,0,0,0,1,0,0,2,9],
     ],
     [
         [9,9,9,9,9,9,9,9,9],
         [9,0,0,0,2,0,0,0,0],
-        [9,0,0,0,0,0,2,0,0],
+        [9,0,0,0,0,0,2,5,0],
         [9,0,3,0,0,0,0,1,0],
-        [9,0,0,4,0,0,3,0,0],
-        [9,0,0,0,0,2,0,0,0],
-        [9,0,0,0,4,0,0,0,2],
-        [9,0,0,1,0,0,0,0,1],
-        [9,1,0,0,0,0,0,2,1],
+        [9,0,5,4,0,0,3,0,0],
+        [9,0,0,0,0,2,5,0,3],
+        [9,0,0,5,4,0,0,0,2],
+        [9,0,0,1,0,0,0,0,3],
+        [9,1,0,0,0,0,0,2,9],
     ],
     [
         [9,9,9,9,9,9,9,9,9],
         [9,0,0,0,0,2,0,0,0],
-        [9,0,0,0,4,0,0,0,0],
+        [9,0,0,5,4,0,0,0,0],
         [9,0,0,1,0,0,0,0,0],
-        [9,0,0,0,0,0,0,3,0],
-        [9,3,0,0,0,0,2,0,0],
+        [9,2,5,0,0,0,0,3,0],
+        [9,3,1,0,0,0,2,5,0],
         [9,0,0,0,0,0,3,0,0],
-        [9,0,0,0,0,0,0,4,3],
-        [9,0,0,0,3,4,0,2,0],
+        [9,0,0,0,0,0,5,4,3],
+        [9,0,0,0,3,4,0,2,9],
     ],
 ];
 
@@ -389,6 +406,55 @@ function generateBoard(){
         fullBoard.push(row);
     }
     return fullBoard;
+}
+
+//set starting positions to where there is no wall nor where a possible goal might be
+function setStartPositions(board){
+    pieceNames = ['red', 'green', 'blue', 'yellow','black'];
+    positions = {};
+    //length might not be 4 watch out!!!!!!!!
+    for(var i=0;i<pieceNames.length;i++){
+        randI = Math.floor(Math.random() * 16) + 1;
+        randJ = Math.floor(Math.random() * 16) + 1;
+        if(board[randI][randJ] !== 9 && board[randI][randJ] !== 5){
+            if(Object.keys(positions).length !== 0){
+                for(var k in Object.values(positions)){
+                    if(Object.values(positions)[k] !== [randI,randJ]){
+                        positions[pieceNames[i]] = [randI,randJ];
+                    }
+                }
+            }
+            else{
+                positions[pieceNames[i]] = [randI,randJ];
+            }
+        }
+        else{
+            randI = Math.floor(Math.random() * 16) + 1;
+            randJ = Math.floor(Math.random() * 16) + 1;
+            i-=1;
+        }
+    }
+    return(positions);
+}
+
+function setGoalPosition(board, pieceStartPositions){
+    possiblePieces = ['red','green','blue','yellow']
+    thePiece = possiblePieces[Math.floor(Math.random()*possiblePieces.length)];
+    possibleGoals = [];
+    for(let i=0; i<board.length; i++) {
+        for(let j=0; j<board[0].length; j++) {
+            if(board[i][j] == 5){
+                possibleGoals.push([i, j]);
+            }
+        }
+    }
+    theGoal = possibleGoals[Math.floor(Math.random()*possibleGoals.length)];
+    goalColorPosition = {
+        color: thePiece,
+        position: theGoal,
+    }
+    console.log(goalColorPosition);
+    return(goalColorPosition);
 }
 
 //Check if a game piece is immediately in the given direction relative to the current piece

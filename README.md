@@ -11,14 +11,14 @@ Online multiplayer board game with multiple gamerooms and chat. Based on the boa
 - [x] Users can move pieces using arrow keys
 - [x] Everyone should be able to control the four colored pieces
 - [x] The pieces move until they hit a wall
+- [x] Random board generation (420 unique boards)
+- [x] New level button to see a new challenge with new board, piece positions, and goal
 
 ## Things to work on:
-- [ ] Render persistent blocks at starting position
-- [ ] Random board generation, along with piece start location randomizer button
-- [ ] Add buttons so users can grab control, and show that in the chat
-- [ ] Add mobile friendly buttons for movement, and get rid of chat on mobile (probably)
-- [ ] Send only current gama data to sockets instead of all games
+
+- [ ] Make mobile friendly! Add mobile friendly buttons for movement, and get rid of chat on mobile (probably)
+- [ ] Send only room relevant data to sockets instead of all games
 - [ ] Improve movement code to include visual transitions
-- [ ] Make user elements pretty
-- [ ] Add more server messages to chat (player leaving, player taking control)
+- [ ] Polish ui and graphics
+- [x] Add more server messages to chat (player leaving, player taking control)
 - [ ] Add timer and other board game elements
