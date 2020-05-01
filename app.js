@@ -214,9 +214,11 @@ io.sockets.on('connection', function(socket){
         //tell users in the room that this user is leaving
         currSockets = games[roomid].socketsInGame;
         playerName = (displaynames[socket.id]);
-        for(var i in SOCKET_LIST){
-            if (currSockets.includes(parseFloat(i))){
-                SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' is leaving...');
+        if(currSockets !== 'undefined'){
+            for(var i in SOCKET_LIST){
+                if (currSockets.includes(parseFloat(i))){
+                    SOCKET_LIST[i].emit('addToChatServer',displaynames[socket.id] + ' is leaving...');
+                }
             }
         }
 
