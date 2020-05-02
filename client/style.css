@@ -30,6 +30,9 @@ a:hover {
     margin: 0 auto;
     width: 50%;
 }
+#game-wrap{
+  height: 100%;
+}
 #game-wrap input, *{
   font-size: 14px;
 }
