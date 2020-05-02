@@ -222,7 +222,12 @@ io.sockets.on('connection', function(socket){
 
     //starts a one minute timer in the room
     socket.on('startTimer',function(roomid){
-        games[roomid].timer = 60;
+        try{
+            games[roomid].timer = 60;
+        }
+        catch(err){
+            console.log(err);
+        }
     });
     //reset pieces to start position
     socket.on('resetPieces',function(roomid){
