@@ -13,14 +13,13 @@ Online multiplayer board game with multiple gamerooms and chat. Based on the boa
 - [x] Everyone should be able to control the four colored pieces
 - [x] The pieces move until they hit a wall
 - [x] Random board generation (420 unique boards)
-- [x] Reset level button to bring pieces back to starting position so player can try again
-- [x] New level button to see a new challenge with new board, piece positions, and goal
+- [x] Reset level button to bring pieces back to starting position so player can try again, with keyboard shortcut (spacebar)
+- [x] New level button to see a new challenge with new board, piece positions, and goal, with keyboard shortcut (n)
+- [x] Players can hit the timer button to start a 60 second countdown timer (countdown after first player solves puzzle)
 
 ## Things to work on:
-
-- [ ] Add keyboard shortcuts for reset button (not new game button because player may accidentally press)
-- [ ] Add timer and other board game elements
-- [ ] Add ui element: 4 boxes with colors and numbers associated with pieces to remind user, also clickable, and box fills in for active piece
+- [ ] Allow players to customize timer length
+- [ ] Possible ui element: 4 boxes with colors and numbers associated with pieces to remind user, also clickable, and box fills in for active piece
 - [ ] Make mobile friendly! Add mobile friendly buttons for movement, and get rid of chat on mobile (probably)
 - [ ] Send only room relevant data to sockets instead of all games
 - [ ] Improve movement code to include visual transitions

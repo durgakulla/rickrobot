@@ -17,14 +17,15 @@ serv.listen(port);
 console.log("Server started.");
 
 //this object holds all of the games with keys
-//1. [roomid]       - mirrors the url of the game
+//1. [roomid]          - uses the url of the game
 //each game has keys:
-//1. socketsInGame    - users in the room
-//2. board          - level currently in play
-//3. currPiece       - piece being controlled
+//1. socketsInGame     - users in the room
+//2. board             - level currently in play
+//3. currPiece         - piece being controlled
 //3. startingPositions - starting location for all pieces
-//4. piecePositions - current location for all pieces
-
+//4. piecePositions    - current location for all pieces
+//5. goalColorPosition - current goal and goal color
+//6. timer             - value of countdown timer
 var games = {}
 
 //use https
@@ -432,28 +433,20 @@ function generateBoard(){
 //set starting positions to where there is no wall nor where a possible goal might be
 function setStartPositions(board){
     pieceNames = ['red', 'green', 'blue', 'yellow','black'];
+    possiblePositions = [];
     positions = {};
-    //length might not be 4 watch out!!!!!!!!
-    for(var i=0;i<pieceNames.length;i++){
-        randI = Math.floor(Math.random() * 16) + 1;
-        randJ = Math.floor(Math.random() * 16) + 1;
-        if(board[randI][randJ] !== 9 && board[randI][randJ] !== 5){
-            if(Object.keys(positions).length !== 0){
-                for(var k in Object.values(positions)){
-                    if(Object.values(positions)[k] !== [randI,randJ]){
-                        positions[pieceNames[i]] = [randI,randJ];
-                    }
-                }
-            }
-            else{
-                positions[pieceNames[i]] = [randI,randJ];
+    for(let i=0; i<board.length; i++) {
+        for(let j=0; j<board[0].length; j++) {
+            if(board[i][j] !== 9 && board[i][j] !== 5){
+                possiblePositions.push([i,j]);
             }
         }
-        else{
-            randI = Math.floor(Math.random() * 16) + 1;
-            randJ = Math.floor(Math.random() * 16) + 1;
-            i-=1;
-        }
+    }
+    for (i in pieceNames){
+        index = Math.floor(Math.random()*possiblePositions.length);
+        thePosition = possiblePositions[index];
+        positions[pieceNames[i]] = thePosition;
+        possiblePositions.splice(index,1);
     }
     return(positions);
 }
